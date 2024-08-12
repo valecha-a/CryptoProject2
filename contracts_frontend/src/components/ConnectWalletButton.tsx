@@ -1,5 +1,5 @@
-//my-nft-marketplace/contracts_frontend/src/components/ConnectWalletButton.tsx
-
+// Part A working code:
+//my-nft-marketplace/contracts_frontend/src/components/ConnectWalletButton.tsx 
 import React from 'react';
 import { Button } from '@mui/material';
 import { useConnect, useAccount, useDisconnect } from 'wagmi';
@@ -15,7 +15,6 @@ const ConnectWalletButton: React.FC = () => {
     const { disconnect } = useDisconnect();
     const { isConnected } = useAccount();
 
-    // Handle button clicks
     const handleConnect = (connector: MetaMaskConnector) => {
         if (pendingConnector) {
             return;
@@ -23,7 +22,6 @@ const ConnectWalletButton: React.FC = () => {
         connect({ connector });
     };
 
-    // Ensure there is only one MetaMask button
     const metaMaskConnectors = connectors.filter(isMetaMaskConnector);
 
     return (

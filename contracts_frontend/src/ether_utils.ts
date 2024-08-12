@@ -1,14 +1,13 @@
-//my-nft-marketplace/my-nft-client/src/ether_utils.ts
-
+// Part A working code:
+//my-nft-marketplace/my-nft-client/src/ether_utils.ts// working on fetching
 import Web3 from 'web3';
 import NFTMarketplaceABI from './utils/NFTMarketplace.json';
 import NFTCollectionABI from './utils/NFTCollectionContract.json';
 
-const web3 = new Web3(new Web3.providers.HttpProvider(process.env.REACT_APP_RPC_URL as string));
+const web3 = new Web3(process.env.REACT_APP_RPC_URL as string);
 
 export const getContract = (contractAddress: string, abi: any) => {
-  const contract = new web3.eth.Contract(abi, contractAddress);
-  return contract;
+  return new web3.eth.Contract(abi, contractAddress);
 };
 
 export const getNFTMarketplaceContract = () => {

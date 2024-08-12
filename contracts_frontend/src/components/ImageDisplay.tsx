@@ -1,66 +1,38 @@
-//my-nft-marketplace/my-nft-client/src/components/ImageDisplay.tsx
+// Part A working code:
+//my-nft-marketplace/contracts_frontend/src/components/ImageDisplay.tsx
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Box, Paper } from '@mui/material';
 
-import React, { useEffect, useState } from 'react';
-import { ethers } from 'ethers';
-import NFTMarketplaceABI from '../utils/NFTMarketplace.json';
 
-const CONTRACT_ADDRESS = '0x7384A5022298f36141eba62E36d81b4532113028'; // Your contract address
+const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-const ImageDisplay = () => {
+const ImageDisplay: React.FC = () => {
   const [nfts, setNfts] = useState<any[]>([]);
-  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
-  const [contract, setContract] = useState<ethers.Contract | null>(null);
 
   useEffect(() => {
-    const fetchNFTs = async () => {
-      if (contract) {
-        try {
-          const totalSupply = await contract.totalSupply();
-          const nftsArray = [];
-
-          for (let i = 1; i <= totalSupply; i++) {
-            const nft = await contract.nfts(i);
-            nftsArray.push(nft);
-          }
-
-          setNfts(nftsArray);
-        } catch (error) {
-          console.error("Error fetching NFTs:", error);
-        }
+    const fetchNfts = async () => {
+      const response = await axios.get('/api/nfts'); 
+      const nftsWithThrottling = [];
+      for (const nft of response.data) {
+        await delay(1000); 
+        nftsWithThrottling.push(nft);
       }
+      setNfts(nftsWithThrottling);
     };
 
-    fetchNFTs();
-  }, [contract]);
-
-  const connectProvider = async () => {
-    if (window.ethereum) {
-      try {
-        const tempProvider = new ethers.BrowserProvider(window.ethereum);
-        const signer = await tempProvider.getSigner();
-        const tempContract = new ethers.Contract(CONTRACT_ADDRESS, NFTMarketplaceABI.abi, signer);
-        setProvider(tempProvider);
-        setContract(tempContract);
-      } catch (error) {
-        console.error("Error connecting provider:", error);
-      }
-    } else {
-      alert('Please install MetaMask!');
-    }
-  };
+    fetchNfts();
+  }, []);
 
   return (
-    <div>
-      <button onClick={connectProvider}>Connect Wallet</button>
-      <div>
-        {nfts.map((nft, index) => (
-          <div key={index}>
-            <img src={nft.uri} alt={`NFT ${nft.id}`} />
-            <p>Price: {ethers.formatUnits(nft.price.toString(), 'ether')} ETH</p>
-          </div>
-        ))}
-      </div>
-    </div>
+    <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
+      {nfts.map((nft) => (
+        <Paper key={nft.id} sx={{ width: '200px', margin: '10px', padding: '10px' }}>
+          <img src={`https://ipfs.io/ipfs/${nft.imageHash}`} alt={nft.name} style={{ width: '100%' }} /> {/* Switched to public IPFS gateway */}
+          <p>{nft.name}</p>
+        </Paper>
+      ))}
+    </Box>
   );
 };
 

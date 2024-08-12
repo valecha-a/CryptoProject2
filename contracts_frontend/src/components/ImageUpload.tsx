@@ -1,83 +1,74 @@
-// my-nft-marketplace/my-nft-client/src/components/ImageUpload.tsx
-
+// Part A working code:
+//my-nft-marketplace/contracts_frontend/src/components/ImageUpload.tsx
 import React, { useState } from 'react';
-import { create } from 'ipfs-http-client';
-import { ethers } from 'ethers';
-import NFTMarketplaceABI from '../utils/NFTMarketplace.json';
+import axios from 'axios';
 
-const CONTRACT_ADDRESS = '0x7384A5022298f36141eba62E36d81b4532113028'; // Your contract address
+interface ImageUploadProps {
+  onSuccess: (ipfsHash: string, metadata: any) => void;
+}
 
-const client = create({
-  host: 'ipfs.infura.io',
-  port: 5001,
-  protocol: 'https',
-  headers: {
-    authorization: `Basic ${btoa(`${process.env.REACT_APP_PINATA_API_KEY}:${process.env.REACT_APP_PINATA_SECRET_KEY}`)}`
-  }
-});
+const ImageUpload: React.FC<ImageUploadProps> = ({ onSuccess }) => {
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-const ImageUpload = () => {
-  const [image, setImage] = useState<File | null>(null);
-  const [tokenURI, setTokenURI] = useState<string>('');
-  const [price, setPrice] = useState<number>(0);
-  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
-  const [contract, setContract] = useState<ethers.Contract | null>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setImageFile(event.target.files[0]);
     }
   };
 
-  const uploadToIPFS = async () => {
-    if (image) {
-      try {
-        const added = await client.add(image);
-        const uri = `https://ipfs.infura.io/ipfs/${added.path}`;
-        setTokenURI(uri);
-        alert('Image uploaded successfully');
-      } catch (error) {
+  const handleUpload = async () => {
+    if (!imageFile) {
+        setError('Please select an image file to upload.');
+        return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append('file', imageFile);
+
+    try {
+        console.log('Uploading image to IPFS via Pinata...');
+        const response = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', formData, {
+            headers: {
+                'pinata_api_key': process.env.REACT_APP_PINATA_API_KEY!,
+                'pinata_secret_api_key': process.env.REACT_APP_PINATA_SECRET_KEY!,
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        if (response.status !== 200) {
+            throw new Error(`Unexpected response status: ${response.status}`);
+        }
+
+        const ipfsHash = response.data.IpfsHash;
+        console.log(`Image successfully uploaded to IPFS. CID: ${ipfsHash}`);
+
+        const metadata = {
+            name: imageFile.name,
+            size: imageFile.size,
+            type: imageFile.type,
+        };
+
+        onSuccess(ipfsHash, metadata);
+    } catch (error) {
+        setError('Error uploading image. Please try again.');
         console.error('Error uploading image:', error);
-      }
+    } finally {
+        setLoading(false);
     }
-  };
-
-  const createNFT = async () => {
-    if (contract && tokenURI) {
-      try {
-        const tx = await contract.createNFT(tokenURI, ethers.parseUnits(price.toString(), 'ether'));
-        await tx.wait();
-        alert('NFT created successfully');
-      } catch (error) {
-        console.error('Error creating NFT:', error);
-      }
-    }
-  };
-
-  const connectProvider = async () => {
-    if (window.ethereum) {
-      try {
-        const tempProvider = new ethers.BrowserProvider(window.ethereum);
-        const signer = await tempProvider.getSigner();
-        const tempContract = new ethers.Contract(CONTRACT_ADDRESS, NFTMarketplaceABI.abi, signer);
-        setProvider(tempProvider);
-        setContract(tempContract);
-      } catch (error) {
-        console.error('Error connecting provider:', error);
-      }
-    } else {
-      alert('Please install MetaMask!');
-    }
-  };
+};
 
   return (
     <div>
-      <button onClick={connectProvider}>Connect Wallet</button>
-      <input type="file" onChange={handleFileChange} />
-      <button onClick={uploadToIPFS}>Upload to IPFS</button>
-      <input type="text" placeholder="Token URI" value={tokenURI} readOnly />
-      <input type="number" placeholder="Price (ETH)" value={price} onChange={(e) => setPrice(Number(e.target.value))} />
-      <button onClick={createNFT}>Create NFT</button>
+      <input type="file" accept="image/*" onChange={handleFileChange} />
+      <button onClick={handleUpload} disabled={loading}>
+        {loading ? 'Uploading...' : 'Upload Image'}
+      </button>
+      {error && <p>{error}</p>}
     </div>
   );
 };

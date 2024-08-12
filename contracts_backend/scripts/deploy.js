@@ -1,63 +1,5 @@
-// require('dotenv').config();
-// const { ethers } = require("hardhat");
-
-// async function main() {
-//     const [deployer] = await ethers.getSigners();
-
-//     console.log("Deploying contracts with the account:", deployer.address);
-
-//     try {
-//         const NFTMarketplace = await ethers.getContractFactory("NFTMarketplace");
-//         const nftMarketplace = await NFTMarketplace.deploy();
-
-//         await nftMarketplace.deployed();
-
-//         console.log("NFTMarketplace deployed to:", nftMarketplace.address);
-//     } catch (error) {
-//         console.error("Error deploying contract:", error);
-//     }
-// }
-
-// main()
-//     .then(() => process.exit(0))
-//     .catch((error) => {
-//         console.error("Unhandled error during deployment:", error);
-//         process.exit(1);
-//     });
-
-
-// require('dotenv').config();
-// const { ethers } = require('hardhat');
-
-// async function main() {
-//     const [deployer] = await ethers.getSigners();
-
-//     console.log("Deploying contracts with the account:", deployer.address);
-
-//     const NFTMarketplace = await ethers.getContractFactory("NFTMarketplace");
-    
-//     // Define gas settings
-//     const gasLimit = 6000000; // Increase gas limit as needed
-
-//     try {
-//         const nftMarketplace = await NFTMarketplace.deploy({
-//             gasLimit: gasLimit, // Set the gas limit
-//         });
-
-//         await nftMarketplace.deployed();
-
-//         console.log("NFTMarketplace deployed to:", nftMarketplace.address);
-//     } catch (error) {
-//         console.error("Error deploying contract:", error);
-//     }
-// }
-
-// main()
-//     .then(() => process.exit(0))
-//     .catch((error) => {
-//         console.error("Unhandled error during deployment:", error);
-//         process.exit(1);
-//     });
+// Part A working code:
+// my-nft-marketplace/contracts_backend/scripts/deploy.js
 
 require('@nomiclabs/hardhat-waffle');
 require('dotenv').config();
@@ -72,27 +14,31 @@ async function main() {
     const balance = await deployer.getBalance();
     console.log(`Deployer's balance: ${ethers.utils.formatEther(balance)} ETH`);
 
+    // Deploy NFTMarketplace contract
     const NFTMarketplace = await ethers.getContractFactory("NFTMarketplace");
-    
-    // Define gas settings
-    const gasLimit = 5000000; // Increase if needed
-    const gasPrice = ethers.utils.parseUnits('20', 'gwei'); // Higher gas price for faster transactions
+    const nftMarketplace = await NFTMarketplace.deploy({
+        gasLimit: 3000000,
+        gasPrice: ethers.utils.parseUnits('20', 'gwei'),
+    });
+    await nftMarketplace.deployed();
+    console.log("NFTMarketplace deployed to:", nftMarketplace.address);
 
-    console.log("Deploying contract...");
+    // Deploy NFTCollectionContract for testing (optional)
+    // You can deploy this contract separately or inside the createCollection function in NFTMarketplace
+    const NFTCollection = await ethers.getContractFactory("NFTCollectionContract");
+    const nftCollection = await NFTCollection.deploy("Test Collection", "TST", deployer.address);
+    await nftCollection.deployed();
+    console.log("NFTCollectionContract deployed to:", nftCollection.address);
 
-    try {
-        const nftMarketplace = await NFTMarketplace.deploy({
-            gasLimit: gasLimit,
-            gasPrice: gasPrice,
-        });
+    // Optionally, save the addresses to a file or environment variables
+    const fs = require('fs');
+    const addresses = {
+        nftMarketplace: nftMarketplace.address,
+        nftCollection: nftCollection.address,
+    };
+    fs.writeFileSync('addresses.json', JSON.stringify(addresses, null, 2));
 
-        console.log("Waiting for deployment to complete...");
-        await nftMarketplace.deployed();
-
-        console.log("NFTMarketplace deployed to:", nftMarketplace.address);
-    } catch (error) {
-        console.error("Error deploying contract:", error);
-    }
+    console.log("Deployment addresses saved to addresses.json");
 }
 
 main()
