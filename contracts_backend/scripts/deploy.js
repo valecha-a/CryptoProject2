@@ -1,5 +1,5 @@
-// Part A working code:
-// my-nft-marketplace/contracts_backend/scripts/deploy.js
+// // Part A & B working code:
+// // my-nft-marketplace/contracts_backend/scripts/deploy.js
 
 require('@nomiclabs/hardhat-waffle');
 require('dotenv').config();
@@ -47,3 +47,4 @@ main()
         console.error("Unhandled error during deployment:", error);
         process.exit(1);
     });
+

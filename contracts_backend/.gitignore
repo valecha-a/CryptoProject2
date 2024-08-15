@@ -9,6 +9,9 @@ out/
 
 # Docs
 docs/
+.env
+
+node_modules
 
 contracts_backend/lib/forge-std/
 contracts_backend/lib/openzeppelin-contracts/

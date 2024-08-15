@@ -1,4 +1,4 @@
-// Part A working code:
+// Part A & B working code:
 //my-nft-marketplace/contracts_frontend/src/App.tsx
 import React, { useState } from 'react';
 import './App.css';

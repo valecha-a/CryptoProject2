@@ -1,4 +1,4 @@
-// Part A working code:
+// Part A & B working code:
 //my-nft-marketplace/my-nft-client/src/ether_utils.ts// working on fetching
 import Web3 from 'web3';
 import NFTMarketplaceABI from './utils/NFTMarketplace.json';
