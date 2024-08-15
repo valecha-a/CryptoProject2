@@ -132,7 +132,7 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "my-nft-marketplace/contracts_backend/lib/openzeppelin-contracts/contracts/utils/Counters.sol";
+import "my-nft-marketplace/contracts_backend/artifacts/contracts/@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 

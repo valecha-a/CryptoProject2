@@ -30,7 +30,7 @@
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "tty-browserify": "^0.0.1",
-    "typescript": "^5.5.3",
+    "typescript": "^4.9.5",
     "uuid": "^10.0.0",
     "viem": "^2.17.4",
     "wagmi": "^1.4.13",
